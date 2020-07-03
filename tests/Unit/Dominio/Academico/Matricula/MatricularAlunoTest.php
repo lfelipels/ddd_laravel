@@ -12,6 +12,7 @@ use Ddd\Arquitetura\Dominios\Academico\Matricula\MatriculaDeAlunoDto;
 use Ddd\Arquitetura\Dominios\Academico\Aluno\RepositorioDeAlunoComEloquent;
 use Ddd\Arquitetura\Dominios\Academico\Curso\RepositorioDeCursoComEloquent;
 use Ddd\Arquitetura\Dominios\Academico\Matricula\RepositorioDeMatriculaComEloquent;
+use Ddd\Arquitetura\Suporte\Evento\DisparadorDeEventoLaravel;
 
 class MatricularAlunoTest extends TestCase
 {
@@ -20,6 +21,7 @@ class MatricularAlunoTest extends TestCase
     private $repositorioDeAluno;
     private $repositorioDeCurso;
     private $repositorioDeMatricula;
+    private $servicoDeMatricula;
 
     public function setUp(): void
     {
@@ -27,6 +29,11 @@ class MatricularAlunoTest extends TestCase
         $this->repositorioDeAluno = new RepositorioDeAlunoComEloquent;
         $this->repositorioDeCurso = new RepositorioDeCursoComEloquent;
         $this->repositorioDeMatricula = new RepositorioDeMatriculaComEloquent();
+        $this->servicoDeMatricula = new MatricularAluno(
+            $this->repositorioDeAluno,
+            $this->repositorioDeCurso,
+            new DisparadorDeEventoLaravel()
+        );;
     }
 
     public function testMatricularAlunoSemCadastro()
@@ -38,8 +45,7 @@ class MatricularAlunoTest extends TestCase
             $curso->id
         );
 
-        $matriculador = new MatricularAluno($this->repositorioDeAluno, $this->repositorioDeCurso);
-        $matriculador->executar($dadosMatricula);
+        $this->servicoDeMatricula->executar($dadosMatricula);
         $aluno = $this->repositorioDeAluno->localizarPorCpf(new Cpf('123.456.789-10'));
         $matriculas = $this->repositorioDeMatricula->recuperarMatriculasPorAluno($aluno);
 
@@ -61,8 +67,7 @@ class MatricularAlunoTest extends TestCase
             $curso->id
         );
 
-        $matriculador = new MatricularAluno($this->repositorioDeAluno, $this->repositorioDeCurso);
-        $matriculador->executar($dadosMatricula);
-        $matriculador->executar($dadosMatricula);
+        $this->servicoDeMatricula->executar($dadosMatricula);
+        $this->servicoDeMatricula->executar($dadosMatricula);
     }
 }
