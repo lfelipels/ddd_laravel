@@ -34,7 +34,7 @@ class Matricula extends Model
         }
         $this->curso_id = $curso->id;
         $this->aluno_id = $aluno->id;
-        $this->numero = (int) uniqid(random_int(1, 9));
+        $this->numero = (new GerarNumeroDeMatricula)->executar();
         $this->save();
     }
 }
