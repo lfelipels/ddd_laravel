@@ -23,6 +23,7 @@ class MatricularAlunoTest extends TestCase
     private $repositorioDeCurso;
     private $repositorioDeMatricula;
     private $servicoDeMatricula;
+    private $curso;
 
     public function setUp(): void
     {
@@ -34,41 +35,39 @@ class MatricularAlunoTest extends TestCase
             $this->repositorioDeAluno,
             $this->repositorioDeCurso,
             new DisparadorDeEventoLaravel()
-        );;
+        );
+        $this->curso = factory(Curso::class)->create();
     }
 
     public function testMatricularAlunoSemCadastro()
     {
-        $curso = factory(Curso::class)->create();
-        $dadosMatricula = new MatriculaDeAlunoDto(
-            'Luis Felipe',
-            '123.456.789-10',
-            $curso->id
-        );
-
-        $this->servicoDeMatricula->executar($dadosMatricula);
+        $this->matricularAluno();
         $aluno = $this->repositorioDeAluno->localizarPorCpf(new Cpf('123.456.789-10'));
         $matriculas = $this->repositorioDeMatricula->recuperarMatriculasPorAluno($aluno);
 
-        $this->assertEquals($dadosMatricula->nome(), $aluno->nome);
-        $this->assertEquals($dadosMatricula->cpf(), $aluno->cpf);
         $this->assertCount(1, $matriculas);
         $this->assertInstanceOf(NumeroDeMatricula::class, $matriculas->first()->numero);
-        $this->assertEquals($matriculas->first()->aluno->id, $aluno->id);
-        $this->assertEquals($matriculas->first()->curso->id, $curso->id);
+        $this->assertNotEmpty($matriculas->first()->numero);
+        $this->assertEquals($aluno->id, $matriculas->first()->aluno->id);
+        $this->assertEquals($this->curso->id, $matriculas->first()->curso->id);
     }
 
     public function testAlunoNaoPodeSerMatriculadoNoMesmoCursoMaisDeUmaVez()
     {
         $this->expectException(\DomainException::class);
-        $curso = factory(Curso::class)->create();
+        $this->matricularAluno();
+        $this->matricularAluno();
+    }
+
+
+    private function matricularAluno()
+    {
+        // $curso = factory(Curso::class)->create();
         $dadosMatricula = new MatriculaDeAlunoDto(
             'Luis Felipe',
             '123.456.789-10',
-            $curso->id
+            $this->curso->id
         );
-
-        $this->servicoDeMatricula->executar($dadosMatricula);
         $this->servicoDeMatricula->executar($dadosMatricula);
     }
 }
