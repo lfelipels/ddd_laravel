@@ -11,6 +11,7 @@ use Ddd\Arquitetura\Dominios\Academico\Matricula\MatricularAluno;
 use Ddd\Arquitetura\Dominios\Academico\Matricula\MatriculaDeAlunoDto;
 use Ddd\Arquitetura\Dominios\Academico\Aluno\RepositorioDeAlunoComEloquent;
 use Ddd\Arquitetura\Dominios\Academico\Curso\RepositorioDeCursoComEloquent;
+use Ddd\Arquitetura\Dominios\Academico\Matricula\NumeroDeMatricula;
 use Ddd\Arquitetura\Dominios\Academico\Matricula\RepositorioDeMatriculaComEloquent;
 use Ddd\Arquitetura\Suporte\Evento\DisparadorDeEventoLaravel;
 
@@ -52,7 +53,7 @@ class MatricularAlunoTest extends TestCase
         $this->assertEquals($dadosMatricula->nome(), $aluno->nome);
         $this->assertEquals($dadosMatricula->cpf(), $aluno->cpf);
         $this->assertCount(1, $matriculas);
-        $this->assertIsNumeric($matriculas->first()->numero);
+        $this->assertInstanceOf(NumeroDeMatricula::class, $matriculas->first()->numero);
         $this->assertEquals($matriculas->first()->aluno->id, $aluno->id);
         $this->assertEquals($matriculas->first()->curso->id, $curso->id);
     }

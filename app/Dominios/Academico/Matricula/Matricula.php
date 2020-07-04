@@ -29,12 +29,34 @@ class Matricula extends Model
 
     public function matricular(Curso $curso, Aluno $aluno)
     {
-        if($this->alunoMatriculadoNoCurso($aluno->id, $curso->id)){
+        if ($this->alunoMatriculadoNoCurso($aluno->id, $curso->id)) {
             throw new \DomainException("Aluno já Matriculado no curso de {$curso->nome}");
         }
         $this->curso_id = $curso->id;
         $this->aluno_id = $aluno->id;
-        $this->numero = (new GerarNumeroDeMatricula)->executar();
+        $this->numero = $this->gerarNumeroDeMatricula();
         $this->save();
+    }
+
+    /**
+     * Gera o numero de matricula do aluno
+     *
+     * @return NumeroDeMatricula
+     */
+    private function gerarNumeroDeMatricula(): NumeroDeMatricula
+    {
+        $numero = (int) uniqid(random_int(1, 9) * 10000);
+        return new NumeroDeMatricula((string) $numero);
+    }
+
+
+    public function getNumeroAttribute(string $numero): NumeroDeMatricula
+    {
+        return new NumeroDeMatricula($numero);
+    }
+
+    public function setNumeroAttribute(NumeroDeMatricula $numero)
+    {
+        $this->attributes['numero'] = (string) $numero;
     }
 }
