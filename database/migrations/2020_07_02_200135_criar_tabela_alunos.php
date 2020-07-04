@@ -16,6 +16,7 @@ class CriarTabelaAlunos extends Migration
         Schema::create('alunos', function (Blueprint $table) {
             $table->id();
             $table->string('nome');
+            $table->string('email');
             $table->string('cpf');
             $table->timestamps();
         });
