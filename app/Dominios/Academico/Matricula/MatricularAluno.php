@@ -8,6 +8,7 @@ use Ddd\Arquitetura\Dominios\Academico\Aluno\AlunoMatriculado;
 use Ddd\Arquitetura\Dominios\Academico\Aluno\RepositorioDeAluno;
 use Ddd\Arquitetura\Dominios\Academico\Curso\RepositorioDeCurso;
 use Ddd\Arquitetura\Dominios\Academico\Matricula\MatriculaDeAlunoDto;
+use Ddd\Arquitetura\Dominios\Shared\Email;
 
 class MatricularAluno
 {
@@ -30,7 +31,11 @@ class MatricularAluno
         $aluno = $this->repositorioDeAluno->localizarPorCpf(new Cpf($dados->cpf()));
         if(!$aluno){
             //cadastra o aluno
-            $this->repositorioDeAluno->adicionar(new Cpf($dados->cpf()), $dados->nome());
+            $this->repositorioDeAluno->adicionar(
+                new Cpf($dados->cpf()),
+                $dados->nome(),
+                new Email($dados->email())
+            );
             $aluno = $this->repositorioDeAluno->localizarPorCpf(new Cpf($dados->cpf()));
         }
         $curso = $this->repositorioDeCurso->localizarOuFalhar($dados->cursoId());
@@ -38,6 +43,6 @@ class MatricularAluno
         $matricula->matricular($curso, $aluno);
 
         //envia email de matricula para o aluno
-        $this->disparadorDeEvento->executar(new AlunoMatriculado($aluno));
+        $this->disparadorDeEvento->executar(new AlunoMatriculado($aluno, $curso));
     }
 }

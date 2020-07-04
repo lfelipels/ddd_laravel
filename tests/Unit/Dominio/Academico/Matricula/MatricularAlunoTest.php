@@ -2,18 +2,22 @@
 
 namespace Tests\Unit\Dominio\Academico\Matricula;
 
+use Ddd\Arquitetura\Aplicacoes\Shared\Emails\EmailAlunoMatriculado;
+use Ddd\Arquitetura\Dominios\Academico\Aluno\AlunoMatriculado;
 use Tests\TestCase;
+use Illuminate\Support\Facades\Event;
 use Ddd\Arquitetura\Dominios\Shared\Cpf;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Ddd\Arquitetura\Dominios\Academico\Curso\Curso;
+use Ddd\Arquitetura\Suporte\Evento\DisparadorDeEventoLaravel;
 use Ddd\Arquitetura\Dominios\Academico\Matricula\MatricularAluno;
+use Ddd\Arquitetura\Dominios\Academico\Matricula\NumeroDeMatricula;
 use Ddd\Arquitetura\Dominios\Academico\Matricula\MatriculaDeAlunoDto;
 use Ddd\Arquitetura\Dominios\Academico\Aluno\RepositorioDeAlunoComEloquent;
 use Ddd\Arquitetura\Dominios\Academico\Curso\RepositorioDeCursoComEloquent;
-use Ddd\Arquitetura\Dominios\Academico\Matricula\NumeroDeMatricula;
 use Ddd\Arquitetura\Dominios\Academico\Matricula\RepositorioDeMatriculaComEloquent;
-use Ddd\Arquitetura\Suporte\Evento\DisparadorDeEventoLaravel;
+use Illuminate\Support\Facades\Mail;
 
 class MatricularAlunoTest extends TestCase
 {
@@ -52,6 +56,13 @@ class MatricularAlunoTest extends TestCase
         $this->assertEquals($this->curso->id, $matriculas->first()->curso->id);
     }
 
+    public function testEnviarEmailDeMatricula()
+    {
+        Mail::fake();
+        $this->matricularAluno();
+        Mail::assertSent(EmailAlunoMatriculado::class);
+    }
+
     public function testAlunoNaoPodeSerMatriculadoNoMesmoCursoMaisDeUmaVez()
     {
         $this->expectException(\DomainException::class);
@@ -64,8 +75,9 @@ class MatricularAlunoTest extends TestCase
     {
         // $curso = factory(Curso::class)->create();
         $dadosMatricula = new MatriculaDeAlunoDto(
-            'Luis Felipe',
+            'Aluno de Exemplo',
             '123.456.789-10',
+            'email@exemplo.com',
             $this->curso->id
         );
         $this->servicoDeMatricula->executar($dadosMatricula);

@@ -2,10 +2,11 @@
 
 namespace Ddd\Arquitetura\Dominios\Academico\Matricula;
 
-use Illuminate\Support\Facades\Log;
+use Ddd\Arquitetura\Aplicacoes\Shared\Emails\EmailAlunoMatriculado;
 use Ddd\Arquitetura\Suporte\Evento\Evento;
 use Ddd\Arquitetura\Suporte\Evento\OuvinteDeEvento;
 use Ddd\Arquitetura\Suporte\Evento\OuvinteDeEventoDoLaravel;
+use Illuminate\Support\Facades\Mail;
 
 class EnviarEmailAlunoMatriculado implements OuvinteDeEvento
 {
@@ -20,6 +21,11 @@ class EnviarEmailAlunoMatriculado implements OuvinteDeEvento
     public function processar(Evento $evento)
     {
         $aluno = $evento->aluno();
-        Log::info("Enviando email para {$aluno->nome}");
+        $curso = $evento->curso();
+        Mail::to($aluno->email)
+        ->send(new EmailAlunoMatriculado(
+            $aluno->nome,
+            $curso->nome
+        ));
     }
 }
